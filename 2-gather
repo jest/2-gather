@@ -8,9 +8,9 @@ use TwoGather::VoteSet;
 get '/' => 'index';
 
 get '/:groovy' => sub {
-    my $self = shift;
-    do_magic();
-    $self->render('test');
+	my $self = shift;
+	do_magic();
+	$self->render('test');
 };
 
 use Data::Dumper;
@@ -19,11 +19,11 @@ print "OK";
 #shagadelic;
 
 sub do_magic {
-    my $v1 = TwoGather::Vote->new(opt => 'maybe', min_people => 3);
-    my $v2 = TwoGather::Vote->new(opt => 'yes');
-    my $vs1 = TwoGather::VoteSet->new;
-    $vs1->votes([$v1, $v2]);
-    return $vs1->hope_for;
+	my $v1 = TwoGather::Vote->new(opt => 'maybe', min_people => 3);
+	my $v2 = TwoGather::Vote->new(opt => 'yes');
+	my $vs1 = TwoGather::VoteSet->new;
+	$vs1->votes([$v1, $v2]);
+	return $vs1->hope_for;
 }
 
 __DATA__
@@ -38,6 +38,6 @@ Yea baby!
 
 @@ layouts/funky.html.ep
 <!doctype html><html>
-    <head><title>Funky!</title></head>
-    <body><%== content %></body>
+	<head><title>Funky!</title></head>
+	<body><%== content %></body>
 </html>
