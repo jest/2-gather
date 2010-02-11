@@ -1,0 +1,55 @@
+===== UC01: oddawanie głosu
+ważność: 5
+
+Każdy uczestnik powinien przed spotkaniem zadeklarować się odnośnie obecności. Może to uczynić oddając swój głos: na "tak" ("będę obecny"), na "nie" ("nie będzie mnie") lub na "może" ("będę jeśli będzie przynajmniej X osób").
+
+--- Scenariusz
+  1. Użytkownik wybiera opcję oddawania głosu.
+  2. System prezentuje pusty formularz.
+  3. Użytkownik wprowadza swoje dane, rodzaj głosu oraz ew. minimalną liczbę osób.
+  4. System zapisuje oddany głos.
+  5. System prezentuje aktualny stan osobowy na spotkaniu.
+--- Wyjątki:
+  4.A. Użytkownik wybrał opcję "może" a nie podał minimalnej liczby osób.
+    4.A.1. System informuje o konieczności podania minimalnej liczby osób.
+    4.A.2. Przejście do 3.
+  4.B. Użytkownik o podanych danych już oddał głos.
+    4.B.1. System informuje, że nie można dwa razy oddać głosu.
+    4.B.2. Przejście do 3.
+
+===== UC02: usuwanie głosu
+ważność: 4
+
+Po oddaniu głosu użytkownik może chcieć go usunąć, bo np. nie jest jeszcze zdecydowany i zamierza zagłosować w terminie późniejszym.
+
+--- Scenariusz
+  1. Użytkownik wybiera opcję usuwania głosu przy swoim głosie.
+  2. System prosi o potwierdzenie usunięcia.
+  3. Użytkownik potwierdza chęć usunięcia głosu.
+  4. System usuwa głos.
+  5. System prezentuje aktualny stan osobowy na spotkaniu.
+--- Wyjątki
+  3.A. Użytkownik anuluje usuwanie głosu.
+    3.A.1. Przejście do 5.
+
+===== UC03: poprawianie głosu
+ważność: 3
+
+Podczas oddawania głosu użytkownik może się pomylić. Należy umożliwić mu poprawienie wprowadzonych danych.
+
+--- Scenariusz
+  1. Użytkownik wybiera opcję poprawiania głosu przy swoim głosie.
+  2. System prezentuje formularz wypełniony danymi z oddanego głosu.
+  3. Użytkownik poprawia rodzaj głosu oraz ew. minimalną liczbę osób.
+  4. System zapisuje oddany głos.
+  5. System prezentuje aktualny stan osobowy na spotkaniu.
+--- Wyjątki:
+  4.A. Użytkownik wybrał opcję "może" a nie podał minimalnej liczby osób.
+    4.A.1. System informuje o konieczności podania minimalnej liczby osób.
+    4.A.2. Przejście do 3.
+
+===== UC04: powiadamianie o zmianach w głosach
+ważność: 2
+
+Po oddaniu głosu, użytkownik jest zainteresowany ile będzie osób na spotkaniu i -- szczególnie jeśli głosował "może" -- czy chce przyjść na spotkanie. Nie chce jednak lub nie może co chwila sprawdzać zmian w stanie głosowania. Chciałby zostać powiadomiony, gdy w systemie zajdą istotne dla niego zmiany, np. oddanie nowego głosu, który zmienia jego status obecności na spotkaniu.
+
