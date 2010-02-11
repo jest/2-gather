@@ -10,21 +10,40 @@ sub kioku_dir {
 }
 
 
-get '/' => 'index';
+get '/' => sub {
+	shift->redirect_to('show');
+} => 'index';
 
 get '/show' => sub {
 	my $self = shift;
 	my $dir = kioku_dir;
 	
-	$self->render('show');
-};
+	my $scope = $dir->new_scope;
+	my $vs = $dir->lookup(1);	# a kind of magic
+	$self->render('show', votes => $vs, kioku => $dir);
+} => 'show';
 
-get '/:groovy' => sub {
+post '/delete' => sub {
+	
+} => 'delete';
+
+post '/add' => sub {
 	my $self = shift;
-	do_magic();
-	$self->render('test');
-};
+	my $dir = kioku_dir;
+	
+	my $scope = $dir->new_scope;
+	my $vs = $dir->lookup(1);	# a kind of magic
+	
+	my $v = TwoGather::Vote->new(name => 'Przemek Wesołek', opt => 'maybe', min_people => 3);
+	$vs->votes([ @{$vs->votes}, $v]);
+	$dir->store($vs);
+	
+	$self->redirect_to('show');
+} => 'add';
 
+get '/edit/:vid' => sub {
+	
+} => 'edit';
 
 #use Data::Dumper;
 #print Dumper(do_magic());
@@ -46,16 +65,47 @@ sub do_magic {
 
 __DATA__
 
-@@ test.html.ep
-% layout 'funky';
+@@ show.html.ep
+% layout 'std';
+<h2>Lista obecności</h2>
+<table>
+<tr>
+	<th>Imię i nazwisko</th>
+	<th>Głos</th>
+	<th>Minimalna liczba osób</th>
+</tr>
+% for my $v (@{$votes->votes}) {
+% my $vid = $kioku->object_to_id($v);
+	<tr>
+		<td><%== $v->name %></td>
+		<td><%== $v->opt %></td>
+		<td><%== $v->opt eq 'maybe' ? $v->min_people : '' %></td>
+		<td><form action="<%== url_for("delete") %>" method="POST"><input type="hidden" name="id" value="<%==$vid%>"><button type="submit">Usuń</button></form></td>
+		<td><form action="<%== url_for("edit", vid => $vid) %>" method="GET"><button type="submit">Popraw</button></form></td>
+	</tr>
+% }
+<tr>
+<form action="<%== url_for("add") %>" method="POST">
+%== $self->render_partial('vote-form');
+</form>
+</tr>
+</table>
 
+@@ vote-form.html.ep
+<td><input type="text" name="name"></td>
+<td>
+	<input type="radio" name="opt" value="yes">Tak</input><br>
+	<input type="radio" name="opt" value="no">Nie</input><br>
+	<input type="radio" name="opt" value="maybe">Może...</input>
+</td>
+<td>gdy będzie co najmniej <input type="text" name="min_people" size="2"> osób</td>
+<td><button type="submit">Dodaj</button></td>
 
-@@ index.html.ep
-% layout 'funky';
-Yea baby!
-
-@@ layouts/funky.html.ep
+@@ layouts/std.html.ep
 <!doctype html><html>
-	<head><title>Funky!</title></head>
+	<head>
+		<title>Siatka</title>
+		<meta name="http-equiv" value="Content-Type: text/html; charset=UTF-8">
+	</head>
 	<body><%== content %></body>
 </html>
