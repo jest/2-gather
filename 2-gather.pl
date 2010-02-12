@@ -11,28 +11,27 @@ use TwoGather::VoteSet;
 
 use KiokuDB;
 sub kioku_dir {
-	return KiokuDB->connect("dbi:SQLite:dbname=siatka.db");
+	my $dir = KiokuDB->connect("dbi:SQLite:dbname=siatka.db");
+	return ($dir, $dir->new_scope);
 }
 
-
-get '/' => sub {
-	shift->redirect_to('show');
-} => 'index';
+get '/' => sub { shift->redirect_to('show'); } => 'index';
 
 get '/show' => sub {
 	my $self = shift;
-	my $dir = kioku_dir;
+	my ($dir, $scope) = kioku_dir;
 	
-	my $scope = $dir->new_scope;
 	my $vs = $dir->lookup(1);	# a kind of magic
-	$self->render('show', votes => $vs, kioku => $dir);
+	$self->render('show',
+		votes => $vs,
+		kioku => $dir,
+		OptNames => { yes => 'Tak', no => 'Nie', maybe => 'Może...' }
+	);
 } => 'show';
 
 post '/delete' => sub {
 	my $self = shift;
-	my $dir = kioku_dir;
-	
-	my $scope = $dir->new_scope;
+	my ($dir, $scope) = kioku_dir;
 	my $vs = $dir->lookup(1);	# a kind of magic
 	
 	my $id = $self->param('id');
@@ -47,9 +46,7 @@ post '/delete' => sub {
 
 post '/add' => sub {
 	my $self = shift;
-	my $dir = kioku_dir;
-	
-	my $scope = $dir->new_scope;
+	my ($dir, $scope) = kioku_dir;
 	my $vs = $dir->lookup(1);	# a kind of magic
 	
 	my $v = TwoGather::Vote->new(name => 'Przemek Wesołek', opt => 'maybe', min_people => 3);
@@ -59,27 +56,8 @@ post '/add' => sub {
 	$self->redirect_to('show');
 } => 'add';
 
-get '/edit/:vid' => sub {
-	
-} => 'edit';
-
-#use Data::Dumper;
-#print Dumper(do_magic());
-#print "OK";
 shagadelic;
 
-
-sub do_magic {
-	my $v1 = TwoGather::Vote->new(opt => 'maybe', min_people => 3);
-	my $v2 = TwoGather::Vote->new(opt => 'yes');
-	my $vs1 = TwoGather::VoteSet->new;
-	$vs1->votes([$v1, $v2]);
-	
-	my $dir = kioku_dir;
-	my $scope = $dir->new_scope;
-	$dir->store($vs1);
-	return $vs1->hope_for;
-}
 
 __DATA__
 
@@ -96,10 +74,9 @@ __DATA__
 % my $vid = $kioku->object_to_id($v);
 	<tr>
 		<td><%== $v->name %></td>
-		<td><%== $v->opt %></td>
-		<td><%== $v->opt eq 'maybe' ? $v->min_people : '' %></td>
+		<td><%== $OptNames->{$v->opt} %></td>
+		<td><%== $v->opt eq 'maybe' ? $v->min_people : '&mdash;' %></td>
 		<td><form action="<%== url_for("delete") %>" method="POST"><input type="hidden" name="id" value="<%==$vid%>"><button type="submit">Usuń</button></form></td>
-		<td><form action="<%== url_for("edit", vid => $vid) %>" method="GET"><button type="submit">Popraw</button></form></td>
 	</tr>
 % }
 <tr>
@@ -111,12 +88,11 @@ __DATA__
 
 @@ vote-form.html.ep
 <td><input type="text" name="name"></td>
-<td>
+<td colspan="2">
 	<input type="radio" name="opt" value="yes">Tak</input><br>
 	<input type="radio" name="opt" value="no">Nie</input><br>
-	<input type="radio" name="opt" value="maybe">Może...</input>
+	<input type="radio" name="opt" value="maybe">Tak, jeśli będzie co najmniej <input type="text" name="min_people" size="2"></input> osób</input>
 </td>
-<td>gdy będzie co najmniej <input type="text" name="min_people" size="2"> osób</td>
 <td><button type="submit">Dodaj</button></td>
 
 @@ layouts/std.html.ep
