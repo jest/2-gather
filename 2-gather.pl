@@ -1,9 +1,14 @@
 #!/usr/bin/env perl
 
 use lib 'lib';
+
+use utf8;
+
 use Mojolicious::Lite;
+
 use TwoGather::Vote;
 use TwoGather::VoteSet;
+
 use KiokuDB;
 sub kioku_dir {
 	return KiokuDB->connect("dbi:SQLite:dbname=siatka.db");
@@ -24,7 +29,20 @@ get '/show' => sub {
 } => 'show';
 
 post '/delete' => sub {
+	my $self = shift;
+	my $dir = kioku_dir;
 	
+	my $scope = $dir->new_scope;
+	my $vs = $dir->lookup(1);	# a kind of magic
+	
+	my $id = $self->param('id');
+	my $v = $dir->lookup($id) if $id;
+	if ($id && $v) {
+		$vs->del_vote($v);
+		$dir->delete($v);
+	}
+	$dir->update($vs);
+	$self->redirect_to('show');
 } => 'delete';
 
 post '/add' => sub {
