@@ -5,6 +5,7 @@ use lib 'lib';
 use utf8;
 
 use Mojolicious::Lite;
+use Validator::Custom::Ext::Mojolicious;
 
 use TwoGather::Vote;
 use TwoGather::VoteSet;
@@ -15,9 +16,47 @@ sub kioku_dir {
 	return ($dir, $dir->new_scope);
 }
 
+my $validator = Validator::Custom::Ext::Mojolicious->new(
+	validator => 'Validator::Custom::HTMLForm',
+	rules     => {
+		create => [
+			title => [ [ { length => [ 0, 255 ] }, 'Title is too long' ] ],
+			brash => [
+				[ 'not_blank', 'Select brach' ],
+				[
+					{ 'in_array' => [qw/bash cpp c-sharp/] }, 'Brash is invalid'
+				]
+			],
+			content => [
+				[ 'not_blank', "Input content" ],
+				[ { length => [ 0, 4096 ] }, "Content is too long" ]
+			]
+		],
+		index => [
+
+			# ...
+		],
+		
+		add => [
+			name => [
+				[ 'not_blank',"Nie podano nazwiska" ]
+			],
+			opt => [
+				[ { in_array => [ qw(yes no maybe) ] }, "Nie wybrano opcji" ],
+			],
+			{ min_people => [ 'opt', 'min_people' ] } => [
+				[ sub { 
+					1;
+				}, "Nie podano minimalnej liczby osób" ]
+			]
+		]
+	}
+);
+
+
 get '/' => sub { shift->redirect_to('show'); } => 'index';
 
-get '/show' => sub {
+sub show_action {
 	my $self = shift;
 	my ($dir, $scope) = kioku_dir;
 	
@@ -27,7 +66,9 @@ get '/show' => sub {
 		kioku => $dir,
 		OptNames => { yes => 'Tak', no => 'Nie', maybe => 'Może...' }
 	);
-} => 'show';
+}
+
+get '/show' => \&show_action => 'show';
 
 post '/delete' => sub {
 	my $self = shift;
@@ -46,6 +87,14 @@ post '/delete' => sub {
 
 post '/add' => sub {
 	my $self = shift;
+	
+	my $vresu = $validator->validate($self);
+	if (! $vresu->is_valid) {
+		my $err = $vresu->errors;
+		$self->stash('errors', $err);
+		return show_action($self);
+	}
+	
 	my ($dir, $scope) = kioku_dir;
 	my $vs = $dir->lookup(1);	# a kind of magic
 	
@@ -63,8 +112,17 @@ __DATA__
 
 @@ show.html.ep
 % layout 'std';
-<h2>Lista obecności</h2>
 <table>
+%== $self->render_partial('people-list');
+<tr>
+<form action="<%== url_for("add") %>" method="POST">
+%== $self->render_partial('vote-form');
+</form>
+</tr>
+</table>
+%== $self->render_partial('errors-pane');
+
+@@ people-list.html.ep
 <tr>
 	<th>Imię i nazwisko</th>
 	<th>Głos</th>
@@ -79,12 +137,18 @@ __DATA__
 		<td><form action="<%== url_for("delete") %>" method="POST"><input type="hidden" name="id" value="<%==$vid%>"><button type="submit">Usuń</button></form></td>
 	</tr>
 % }
-<tr>
-<form action="<%== url_for("add") %>" method="POST">
-%== $self->render_partial('vote-form');
-</form>
-</tr>
-</table>
+
+@@ errors-pane.html.ep
+% if (defined $self->stash('errors')) {
+<div class="errors-list">
+<p>Wystąpiły błędy:</p>
+<ul>
+% for (@{$self->stash('errors')}) {
+<li><%== $_ %></li>
+% }
+</ul>
+</div>
+% }
 
 @@ vote-form.html.ep
 <td><input type="text" name="name"></td>
@@ -100,6 +164,14 @@ __DATA__
 	<head>
 		<title>Siatka</title>
 		<meta name="http-equiv" value="Content-Type: text/html; charset=UTF-8">
+		<style type="text/css">
+			.errors-list {
+				color: red;
+			}
+		</style>
 	</head>
-	<body><%== content %></body>
+	<body>
+	<h2>Lista obecności</h2>
+	<%== content %>
+	</body>
 </html>
