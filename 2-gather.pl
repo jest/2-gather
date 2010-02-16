@@ -1,6 +1,9 @@
 #!/usr/bin/env perl
 
 use lib 'lib';
+use lib 'extlib/Validator-Custom-Ext-Mojolicious';
+
+use 5.010;
 
 use utf8;
 
@@ -39,15 +42,13 @@ my $validator = Validator::Custom::Ext::Mojolicious->new(
 		
 		add => [
 			name => [
-				[ 'not_blank',"Nie podano nazwiska" ]
+				[ 'not_blank', "Nie podano nazwiska" ]
 			],
 			opt => [
 				[ { in_array => [ qw(yes no maybe) ] }, "Nie wybrano opcji" ],
 			],
-			{ min_people => [ 'opt', 'min_people' ] } => [
-				[ sub { 
-					1;
-				}, "Nie podano minimalnej liczby osób" ]
+			min_people => [
+				[ 'uint', "Liczba osób nie jest prawidłowa" ],
 			]
 		]
 	}
@@ -88,6 +89,7 @@ post '/delete' => sub {
 post '/add' => sub {
 	my $self = shift;
 	
+	$self->param('min_people', 0) unless length($self->param('min_people') // '') > 0;
 	my $vresu = $validator->validate($self);
 	if (! $vresu->is_valid) {
 		my $err = $vresu->errors;
@@ -98,7 +100,9 @@ post '/add' => sub {
 	my ($dir, $scope) = kioku_dir;
 	my $vs = $dir->lookup(1);	# a kind of magic
 	
-	my $v = TwoGather::Vote->new(name => 'Przemek Wesołek', opt => 'maybe', min_people => 3);
+	my $v = TwoGather::Vote->new(
+		map { $_ => $self->param($_) } qw(name opt min_people)
+	);
 	$vs->votes([ @{$vs->votes}, $v]);
 	$dir->store($vs);
 	
