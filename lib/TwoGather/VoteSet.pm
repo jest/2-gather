@@ -25,7 +25,7 @@ sub hope_for {
 			$_->opt eq 'yes' ||
 			$_->opt eq 'maybe' && $_->min_people <= $num
 		} @v;
-		last if $num == int @v;
+		last if $num == int @v;	# stable, no change
 	}
 	return \@v;
 }

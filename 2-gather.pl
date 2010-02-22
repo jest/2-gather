@@ -62,8 +62,12 @@ sub show_action {
 	my ($dir, $scope) = kioku_dir;
 	
 	my $vs = $dir->lookup(1);	# a kind of magic
+	my %vs_will_be = map { $_ => 1 } @{$vs->hope_for};
+	
 	$self->render('show',
 		votes => $vs,
+		votes_will_be => \%vs_will_be,
+		num_will_be => int(keys %vs_will_be),
 		kioku => $dir,
 		OptNames => { yes => 'Tak', no => 'Nie', maybe => 'Może...' }
 	);
@@ -116,9 +120,10 @@ __DATA__
 
 @@ show.html.ep
 % layout 'std';
-<table>
+<p>Aktualna liczba osób, które powinny się stawić: <strong><%== $num_will_be %></strong></p>
+<table class="players-table">
 %== $self->render_partial('people-list');
-<tr>
+<tr class="players-table-sep">
 <form action="<%== url_for("add") %>" method="POST">
 %== $self->render_partial('vote-form');
 </form>
@@ -127,17 +132,23 @@ __DATA__
 %== $self->render_partial('errors-pane');
 
 @@ people-list.html.ep
-<tr>
+<tr class="players-table-sep">
 	<th>Imię i nazwisko</th>
 	<th>Głos</th>
 	<th>Minimalna liczba osób</th>
+	<th>Pasuje liczba osób?</th>
 </tr>
 % for my $v (@{$votes->votes}) {
 % my $vid = $kioku->object_to_id($v);
 	<tr>
 		<td><%== $v->name %></td>
-		<td><%== $OptNames->{$v->opt} %></td>
+		<td class="vote-<%== $v->opt %>"><%== $OptNames->{$v->opt} %></td>
 		<td><%== $v->opt eq 'maybe' ? $v->min_people : '&mdash;' %></td>
+% if ($votes_will_be->{$v}) {
+		<td class="vote-yes">Tak</td>
+% } else {
+		<td class="vote-no">Nie</td>
+% }
 		<td><form action="<%== url_for("delete") %>" method="POST"><input type="hidden" name="id" value="<%==$vid%>"><button type="submit">Usuń</button></form></td>
 	</tr>
 % }
@@ -171,6 +182,26 @@ __DATA__
 		<style type="text/css">
 			.errors-list {
 				color: red;
+			}
+			.vote-yes {
+				background-color: green;
+			}
+			.vote-maybe {
+				background-color: yellow;
+			}
+			.vote-no {
+				background-color: red;
+			}
+			.players-table {
+				text-align: center;
+				border: 1pt solid black;
+			}
+			.players-table-sep {
+				background: #e0e0e0;
+				border: 1pt solid black;
+			}
+			.players-table td {
+				padding: 0.5em;				
 			}
 		</style>
 	</head>
