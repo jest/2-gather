@@ -203,6 +203,9 @@ __DATA__
 			.players-table td {
 				padding: 0.5em;				
 			}
+			body, table {
+				font-family: sans-serif;
+			}
 		</style>
 	</head>
 	<body>
