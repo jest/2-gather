@@ -60,7 +60,6 @@ my $validator = Validator::Custom::Ext::Mojolicious->new(
 		],
 		show => [
 			pollid => [
-				[ { regex => qr/^(\d{8})?$/ } ],
 				[ { in_array => \@poll_ids } ]
 			]
 		]
