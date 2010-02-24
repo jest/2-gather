@@ -13,9 +13,16 @@ use Validator::Custom::Ext::Mojolicious;
 use TwoGather::Vote;
 use TwoGather::VoteSet;
 
+my @poll_ids = qw (
+	20100302
+	20100223
+);
+my $current_poll_id = $poll_ids[0];
+
 use KiokuDB;
 sub kioku_dir {
-	my $dir = KiokuDB->connect("dbi:SQLite:dbname=siatka.db");
+	my $date = $_[0] || $current_poll_id;
+	my $dir = KiokuDB->connect("dbi:SQLite:dbname=siatka-$date.db");
 	return ($dir, $dir->new_scope);
 }
 
@@ -50,6 +57,12 @@ my $validator = Validator::Custom::Ext::Mojolicious->new(
 			min_people => [
 				[ 'uint', "Liczba osób nie jest prawidłowa" ],
 			]
+		],
+		show => [
+			pollid => [
+				[ { regex => qr/^(\d{8})?$/ } ],
+				[ { in_array => \@poll_ids } ]
+			]
 		]
 	}
 );
@@ -59,7 +72,12 @@ get '/siatka' => sub { shift->redirect_to('show'); } => 'index';
 
 sub show_action {
 	my $self = shift;
-	my ($dir, $scope) = kioku_dir;
+
+	my $vresu = $validator->validate($self);
+	my $pollid = ($vresu->is_valid) ? $self->param('pollid') : undef;
+	$pollid = undef if $pollid && $pollid eq $current_poll_id;
+	
+	my ($dir, $scope) = kioku_dir($pollid);
 	
 	my $vs = $dir->lookup(1);	# a kind of magic
 	my %vs_will_be = map { $_ => 1 } @{$vs->hope_for};
@@ -69,7 +87,11 @@ sub show_action {
 		votes_will_be => \%vs_will_be,
 		num_will_be => int(keys %vs_will_be),
 		kioku => $dir,
-		OptNames => { yes => 'Tak', no => 'Nie', maybe => 'Może...' }
+		OptNames => { yes => 'Tak', no => 'Nie', maybe => 'Może...' },
+		pollid => $pollid,
+		render_form => !defined($pollid),
+		poll_ids => \@poll_ids,
+		current_poll_id => $current_poll_id
 	);
 }
 
@@ -120,16 +142,25 @@ __DATA__
 
 @@ show.html.ep
 % layout 'std';
+<p>Wersja: <%== $pollid ? "$pollid (zamknięta)" : "$current_poll_id (aktualna)" %></p>
 <p>Aktualna liczba osób, które powinny się stawić: <strong><%== $num_will_be %></strong></p>
 <table class="players-table">
 %== $self->render_partial('people-list');
+% if ($render_form) {
 <tr class="players-table-sep">
 <form action="<%== url_for("add") %>" method="POST">
 %== $self->render_partial('vote-form');
 </form>
 </tr>
+% }
 </table>
 %== $self->render_partial('errors-pane');
+<p>Wszystkie wersje:</p>
+<ul>
+% for (@$poll_ids) {
+<li><a href="<%== url_for 'show' %>?pollid=<%== $_ %>"><%== $_ %></a><% if ($_ eq $current_poll_id) { %> (aktualna)<% } %></li>
+% }
+</ul>
 
 @@ people-list.html.ep
 <tr class="players-table-sep">
@@ -149,7 +180,9 @@ __DATA__
 % } else {
 		<td class="vote-no">Nie</td>
 % }
+% if ($render_form) {
 		<td><form action="<%== url_for("delete") %>" method="POST"><input type="hidden" name="id" value="<%==$vid%>"><button type="submit">Usuń</button></form></td>
+% }
 	</tr>
 % }
 
