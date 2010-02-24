@@ -55,7 +55,7 @@ my $validator = Validator::Custom::Ext::Mojolicious->new(
 );
 
 
-get '/' => sub { shift->redirect_to('show'); } => 'index';
+get '/siatka' => sub { shift->redirect_to('show'); } => 'index';
 
 sub show_action {
 	my $self = shift;
@@ -73,9 +73,9 @@ sub show_action {
 	);
 }
 
-get '/show' => \&show_action => 'show';
+get '/siatka/show' => \&show_action => 'show';
 
-post '/delete' => sub {
+post '/siatka/delete' => sub {
 	my $self = shift;
 	my ($dir, $scope) = kioku_dir;
 	my $vs = $dir->lookup(1);	# a kind of magic
@@ -90,7 +90,7 @@ post '/delete' => sub {
 	$self->redirect_to('show');
 } => 'delete';
 
-post '/add' => sub {
+post '/siatka/add' => sub {
 	my $self = shift;
 	
 	$self->param('min_people', 0) unless length($self->param('min_people') // '') > 0;
