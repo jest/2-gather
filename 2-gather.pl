@@ -52,7 +52,7 @@ my $validator = Validator::Custom::Ext::Mojolicious->new(
 				[ 'not_blank', "Nie podano nazwiska" ]
 			],
 			opt => [
-				[ { in_array => [ qw(yes no maybe) ] }, "Nie wybrano opcji" ],
+				[ { in_array => [ qw(yes no maybe dontknow) ] }, "Nie wybrano opcji" ],
 			],
 			min_people => [
 				[ 'uint', "Liczba osób nie jest prawidłowa" ],
@@ -86,7 +86,7 @@ sub show_action {
 		votes_will_be => \%vs_will_be,
 		num_will_be => int(keys %vs_will_be),
 		kioku => $dir,
-		OptNames => { yes => 'Tak', no => 'Nie', maybe => 'Może...' },
+		OptNames => { yes => 'Tak', no => 'Nie', maybe => 'Może...', dontknow => 'Nie wiem' },
 		pollid => $pollid,
 		render_form => !defined($pollid),
 		poll_ids => \@poll_ids,
@@ -176,6 +176,8 @@ __DATA__
 		<td><%== $v->opt eq 'maybe' ? $v->min_people : '&mdash;' %></td>
 % if ($votes_will_be->{$v}) {
 		<td class="vote-yes">Tak</td>
+% } elsif ($v->opt eq 'dontknow') {
+		<td>?</td>
 % } else {
 		<td class="vote-no">Nie</td>
 % }
@@ -200,6 +202,7 @@ __DATA__
 @@ vote-form.html.ep
 <td><input type="text" name="name"></td>
 <td colspan="2">
+	<input type="radio" name="opt" value="dontknow">Nie wiem</input><br>
 	<input type="radio" name="opt" value="yes">Tak</input><br>
 	<input type="radio" name="opt" value="no">Nie</input><br>
 	<input type="radio" name="opt" value="maybe">Tak, jeśli będzie co najmniej <input type="text" name="min_people" size="2"></input> osób</input>
