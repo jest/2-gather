@@ -14,6 +14,8 @@ use TwoGather::Vote;
 use TwoGather::VoteSet;
 
 my @poll_ids = qw (
+	20100316
+	20100309
 	20100302
 	20100223
 );
@@ -201,9 +203,9 @@ __DATA__
 
 @@ vote-form.html.ep
 <td><input type="text" name="name"></td>
-<td colspan="2">
-	<input type="radio" name="opt" value="dontknow">Nie wiem</input><br>
-	<input type="radio" name="opt" value="yes">Tak</input><br>
+<td colspan="2" style="text-align: left">
+	<input type="radio" name="opt" value="dontknow">Nie wiem</input>&nbsp;&nbsp;&nbsp;
+	<input type="radio" name="opt" value="yes">Tak</input>&nbsp;&nbsp;&nbsp;
 	<input type="radio" name="opt" value="no">Nie</input><br>
 	<input type="radio" name="opt" value="maybe">Tak, jeśli będzie co najmniej <input type="text" name="min_people" size="2"></input> osób</input>
 </td>
