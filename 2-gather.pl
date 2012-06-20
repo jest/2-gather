@@ -1,14 +1,11 @@
 #!/usr/bin/env perl
 
-use lib 'lib';
-use lib 'extlib/Validator-Custom-Ext-Mojolicious';
-
-use 5.010;
+use common::sense;
 
 use utf8;
 
 use Mojolicious::Lite;
-use Validator::Custom::Ext::Mojolicious;
+use Validator::Custom;
 
 use TwoGather::Vote;
 use TwoGather::VoteSet;
@@ -28,9 +25,9 @@ sub kioku_dir {
 	return ($dir, $dir->new_scope);
 }
 
-my $validator = Validator::Custom::Ext::Mojolicious->new(
-	validator => 'Validator::Custom::HTMLForm',
-	rules     => {
+sub validate_params {
+	state $validator = Validator::Custom->new;
+	state $rules = {
 		create => [
 			title => [ [ { length => [ 0, 255 ] }, 'Title is too long' ] ],
 			brash => [
@@ -65,17 +62,23 @@ my $validator = Validator::Custom::Ext::Mojolicious->new(
 				[ { in_array => \@poll_ids } ]
 			]
 		]
-	}
-);
+	};
 
+	my ($c) = @_;
+	my $name = $c->match->endpoint->name;
+	my $rule = $rules->{$name} // [ ];
+	my %params = map { $_ => $c->param($_) } $c->param;
 
-get '/siatka' => sub { shift->redirect_to('show'); } => 'index';
+	$validator->validate(\%params, $rule);
+}
+
+get '/' => sub { shift->redirect_to('show'); } => 'index';
 
 sub show_action {
 	my $self = shift;
 
-	my $vresu = $validator->validate($self);
-	my $pollid = ($vresu->is_valid) ? $self->param('pollid') : undef;
+	my $vresu = validate_params($self);
+	my $pollid = ($vresu->is_ok) ? $self->param('pollid') : undef;
 	$pollid = undef if $pollid && $pollid eq $current_poll_id;
 	
 	my ($dir, $scope) = kioku_dir($pollid);
@@ -96,9 +99,9 @@ sub show_action {
 	);
 }
 
-get '/siatka/show' => \&show_action => 'show';
+get '/show' => \&show_action => 'show';
 
-post '/siatka/delete' => sub {
+post '/delete' => sub {
 	my $self = shift;
 	my ($dir, $scope) = kioku_dir;
 	my $vs = $dir->lookup(1);	# a kind of magic
@@ -113,13 +116,13 @@ post '/siatka/delete' => sub {
 	$self->redirect_to('show');
 } => 'delete';
 
-post '/siatka/add' => sub {
+post '/add' => sub {
 	my $self = shift;
 	
 	$self->param('min_people', 0) unless length($self->param('min_people') // '') > 0;
-	my $vresu = $validator->validate($self);
-	if (! $vresu->is_valid) {
-		my $err = $vresu->errors;
+	my $vresu = validate_params($self);
+	if (! $vresu->is_ok) {
+		my $err = $vresu->messages;
 		$self->stash('errors', $err);
 		return show_action($self);
 	}
@@ -136,7 +139,7 @@ post '/siatka/add' => sub {
 	$self->redirect_to('show');
 } => 'add';
 
-shagadelic;
+app->start;
 
 
 __DATA__
