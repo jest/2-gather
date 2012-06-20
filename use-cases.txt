@@ -1,12 +1,15 @@
 ===== UC01: oddawanie głosu
 ważność: 5
 
-Każdy uczestnik powinien przed spotkaniem zadeklarować się odnośnie obecności. Może to uczynić oddając swój głos: na "tak" ("będę obecny"), na "nie" ("nie będzie mnie") lub na "może" ("będę jeśli będzie przynajmniej X osób").
+Każdy uczestnik powinien przed spotkaniem zadeklarować się odnośnie obecności.
+Może to uczynić oddając swój głos: na "tak" ("będę obecny"), na "nie" ("nie
+będzie mnie") lub na "może" ("będę jeśli będzie przynajmniej X osób").
 
 --- Scenariusz
   1. Użytkownik wybiera opcję oddawania głosu.
   2. System prezentuje pusty formularz.
-  3. Użytkownik wprowadza swoje dane, rodzaj głosu oraz ew. minimalną liczbę osób.
+  3. Użytkownik wprowadza swoje dane, rodzaj głosu oraz ew. minimalną liczbę
+     osób.
   4. System zapisuje oddany głos.
   5. System prezentuje aktualny stan osobowy na spotkaniu.
 --- Wyjątki:
@@ -20,7 +23,8 @@ Każdy uczestnik powinien przed spotkaniem zadeklarować się odnośnie obecnoś
 ===== UC02: usuwanie głosu
 ważność: 4
 
-Po oddaniu głosu użytkownik może chcieć go usunąć, bo np. nie jest jeszcze zdecydowany i zamierza zagłosować w terminie późniejszym.
+Po oddaniu głosu użytkownik może chcieć go usunąć, bo np. nie jest jeszcze
+zdecydowany i zamierza zagłosować w terminie późniejszym.
 
 --- Scenariusz
   1. Użytkownik wybiera opcję usuwania głosu przy swoim głosie.
@@ -35,7 +39,8 @@ Po oddaniu głosu użytkownik może chcieć go usunąć, bo np. nie jest jeszcze
 ===== UC03: poprawianie głosu
 ważność: 3
 
-Podczas oddawania głosu użytkownik może się pomylić. Należy umożliwić mu poprawienie wprowadzonych danych.
+Podczas oddawania głosu użytkownik może się pomylić. Należy umożliwić mu
+poprawienie wprowadzonych danych.
 
 --- Scenariusz
   1. Użytkownik wybiera opcję poprawiania głosu przy swoim głosie.
@@ -51,5 +56,9 @@ Podczas oddawania głosu użytkownik może się pomylić. Należy umożliwić mu
 ===== UC04: powiadamianie o zmianach w głosach
 ważność: 2
 
-Po oddaniu głosu, użytkownik jest zainteresowany ile będzie osób na spotkaniu i -- szczególnie jeśli głosował "może" -- czy chce przyjść na spotkanie. Nie chce jednak lub nie może co chwila sprawdzać zmian w stanie głosowania. Chciałby zostać powiadomiony, gdy w systemie zajdą istotne dla niego zmiany, np. oddanie nowego głosu, który zmienia jego status obecności na spotkaniu.
+Po oddaniu głosu, użytkownik jest zainteresowany ile będzie osób na spotkaniu i
+-- szczególnie jeśli głosował "może" -- czy chce przyjść na spotkanie. Nie chce
+jednak lub nie może co chwila sprawdzać zmian w stanie głosowania. Chciałby
+zostać powiadomiony, gdy w systemie zajdą istotne dla niego zmiany, np. oddanie
+nowego głosu, który zmienia jego status obecności na spotkaniu.
 
