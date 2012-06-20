@@ -1,1 +1,4 @@
 log
+.carton
+carton.lock
+local
