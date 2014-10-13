@@ -7,6 +7,6 @@ Sorry, the spec is in Polish and I have no needs to translate it to English. I h
 
 Also, this code is not production-quality. I was playing around with Mojolicious, KiokuDB, Validator::Custom and Moose, and this code is a temporarily satisfying result.
 
-![example 1](http://github.com/jest/2-gather/raw/master/example1.png)
+![example 1](https://raw.githubusercontent.com/jest/2-gather/master/example1.png)
 
-![example 2](http://github.com/jest/2-gather/raw/master/example2.png)
+![example 2](https://raw.githubusercontent.com/jest/2-gather/master/example2.png)
